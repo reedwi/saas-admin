@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+    provider            = "postgresql"
+    url                 = env("DATABASE_URL")
+    directUrl           = env("DIRECT_DATABASE_URL")
+}
+
+generator client {
+    provider            = "prisma-client-js"
+}
+
+model User {
+    id            String  @id @default(uuid())
+    email         String
+    firstName     String
+    lastName      String
+    role          String
+    payments      Payment[]
+    orders        Order[]
+    createdAt     DateTime @default(now()) @map("created_at")
+    updatedAt     DateTime @updatedAt @map("updated_at")
+
+    @@map("users")
+}
+
+model Application {
+    id            String  @id @default(uuid())
+    name          String
+    description   String
+    products      Product[] @relation("ApplicationToProduct")
+    orders        Order[] @relation("ApplicationToOrder")
+    orderItems    OrderItem[] @relation("ApplicationToOrderItem")
+    payments      Payment[]@relation("ApplicationToPayment")
+    createdAt     DateTime @default(now()) @map("created_at")
+    updatedAt     DateTime @updatedAt @map("updated_at")
+
+    @@map("applications")
+}
+
+model Product {
+    id            String  @id @default(uuid())
+    name          String
+    description   String
+    price         Decimal
+    applicationId String
+    application   Application @relation("ApplicationToProduct", fields: [applicationId], references: [id])
+    orderItems    OrderItem[]
+    createdAt     DateTime @default(now()) @map("created_at")
+    updatedAt     DateTime @updatedAt @map("updated_at")
+
+    @@map("products")
+}
+
+model Order {
+    id            String @id @default(uuid())
+    isPaid        Boolean @map("is_paid") @default(false)
+    phone         String @default("")
+    address       String @default("")
+    orderItems    OrderItem[]
+    userId        String
+    payment       Payment?
+    applicationId String
+    application   Application @relation("ApplicationToOrder", fields: [applicationId], references: [id])
+    user          User @relation(fields: [userId], references: [id])
+    createdAt     DateTime @default(now()) @map("created_at")
+    updatedAt     DateTime @updatedAt @map("updated_at")
+
+    @@map("orders")
+}
+
+model OrderItem {
+    id            String @id @default(uuid())
+    orderId       String @map("order_id")
+    order         Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    productId     String @map("service_id")
+    product       Product @relation(fields:[productId], references: [id], onDelete: Cascade)
+    applicationId String
+    application   Application @relation("ApplicationToOrderItem", fields: [applicationId], references: [id])
+    createdAt     DateTime @default(now()) @map("created_at")
+    updatedAt     DateTime @updatedAt @map("updated_at")
+
+    @@map("order_items")
+}
+
+model Payment {
+    id            String @id @default(uuid())
+    paymentDate   DateTime @map("payment_date")
+    amount        Decimal
+    userId        String
+    user          User @relation(fields: [userId], references: [id])
+    orderId       String @unique
+    order         Order @relation(fields: [orderId], references: [id])
+    applicationId String
+    application   Application @relation("ApplicationToPayment", fields: [applicationId], references: [id])
+    createdAt     DateTime @default(now()) @map("created_at")
+    updatedAt     DateTime @updatedAt @map("updated_at")
+
+    @@map("payments")
+}
