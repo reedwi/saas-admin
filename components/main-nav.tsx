@@ -29,6 +29,11 @@ export function MainNav({
       active: pathname === `/${params.applicationId}/orders`
     },
     {
+      href: `/${params.applicationId}/payments`,
+      label: 'Payments',
+      active: pathname === `/${params.applicationId}/payments`
+    },
+    {
       href: `/${params.applicationId}/settings`,
       label: 'Settings',
       active: pathname === `/${params.applicationId}/settings`

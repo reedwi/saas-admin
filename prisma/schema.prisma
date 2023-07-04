@@ -17,8 +17,11 @@ model User {
     firstName     String
     lastName      String
     role          String
+    active        Boolean
+    lastPaymentDate DateTime @map("last_payment_date")
     payments      Payment[]
     orders        Order[]
+    usage         Usage[]
     createdAt     DateTime @default(now()) @map("created_at")
     updatedAt     DateTime @updatedAt @map("updated_at")
 
@@ -33,6 +36,7 @@ model Application {
     orders        Order[] @relation("ApplicationToOrder")
     orderItems    OrderItem[] @relation("ApplicationToOrderItem")
     payments      Payment[]@relation("ApplicationToPayment")
+    usage         Usage[] @relation("ApplicationToUsage")
     createdAt     DateTime @default(now()) @map("created_at")
     updatedAt     DateTime @updatedAt @map("updated_at")
 
@@ -98,4 +102,14 @@ model Payment {
     updatedAt     DateTime @updatedAt @map("updated_at")
 
     @@map("payments")
+}
+
+model Usage {
+    id            String @id @default(uuid())
+    tokensUsed    BigInt @map("tokens_used")
+    userId        String
+    user          User @relation(fields: [userId], references: [id])
+    applicationId String
+    application   Application @relation("ApplicationToUsage", fields: [applicationId], references: [id])
+    createdAt     DateTime @default(now()) @map("created_at")
 }

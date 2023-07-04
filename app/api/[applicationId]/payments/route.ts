@@ -56,6 +56,7 @@ export async function GET(
 ) {
   try {
     const { searchParams } = new URL(req.url)
+
     const { userId } = auth();
 
     if (!userId) {
@@ -63,25 +64,25 @@ export async function GET(
     }
 
     if (!params.applicationId) {
-      return new NextResponse("Store id is required", { status: 400 });
+      return new NextResponse("Application id is required", { status: 400 });
     }
 
-    const orders = await prismadb.order.findMany({
+    const payments = await prismadb.payment.findMany({
       where: {
         applicationId: params.applicationId,
       },
       include: {
-        user: true,
-        orderItems: true
+        order: true,
+        user: true
       },
       orderBy: {
         createdAt: 'desc',
       }
     });
   
-    return NextResponse.json(orders);
+    return NextResponse.json(payments);
   } catch (error) {
-    console.log('[PRODUCTS_GET]', error);
+    console.log('[PAYMENTS_GET]', error);
     return new NextResponse("Internal error", { status: 500 });
   }
 };
